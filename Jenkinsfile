@@ -20,45 +20,50 @@ stages {
   stage('Docker Run') {
     steps {
       script {
-      sh '''
+      sh """
       docker compose down
       docker compose up --no-build -d
       sleep 10
-      '''
+      """
       }
     }
   }
-  stage('Test Acceptance'){
+  stage('Test Acceptance') {
     steps {
       script {
-      sh '''
+      sh """
       curl localhost:8080/api/v1/movies/docs
       curl localhost:8080/api/v1/casts/docs
-      '''
+      """
       }
     }
   }
-  // stage('Docker Push'){ //we pass the built image to our docker hub account
-  //   environment
-  //   {
-  //     DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
-  //   }
-  //   steps {
-  //     script {
-  //       sh '''
-  //       docker login -u $DOCKER_ID -p $DOCKER_PASS
-  //       docker push $DOCKER_ID/$DOCKER_IMAGE:$DOCKER_TAG
-  //       '''
-  //     }
-  //   }
-  // }
+  stage('Docker Push') {
+    environment
+    {
+      DOCKER_PASS = credentials("DOCKER_HUB_PASS")
+    }
+    steps {
+      script {
+        sh """
+        docker login -u "$DOCKER_ID" -p "$DOCKER_PASS"
+        # Push tagged images
+        docker push "${DOCKER_ID}/${DOCKER_IMAGE}:movie.${DOCKER_TAG}"
+        docker push "${DOCKER_ID}/${DOCKER_IMAGE}:cast.${DOCKER_TAG}"
+        # Move latest tags
+        docker push "${DOCKER_ID}/${DOCKER_IMAGE}:movie.latest"
+        docker push "${DOCKER_ID}/${DOCKER_IMAGE}:cast.latest"
+        """
+      }
+    }
+  }
   // stage('Deploiement en dev'){
   //   environment {
   //   KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
   //   }
   //   steps {
   //     script {
-  //     sh '''
+  //     sh """
   //     rm -Rf .kube
   //     mkdir .kube
   //     ls
@@ -67,7 +72,7 @@ stages {
   //     cat values.yml
   //     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
   //     helm upgrade --install app fastapi --values=values.yml --namespace dev
-  //     '''
+  //     """
   //     }
   //   }
   // }
@@ -77,7 +82,7 @@ stages {
   //   }
   //   steps {
   //     script {
-  //     sh '''
+  //     sh """
   //     rm -Rf .kube
   //     mkdir .kube
   //     ls
@@ -86,7 +91,7 @@ stages {
   //     cat values.yml
   //     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
   //     helm upgrade --install app fastapi --values=values.yml --namespace staging
-  //     '''
+  //     """
   //     }
   //   }
   // }
@@ -101,7 +106,7 @@ stages {
   //         input message: 'Do you want to deploy in production ?', ok: 'Yes'
   //       }
   //       script {
-  //         sh '''
+  //         sh """
   //         rm -Rf .kube
   //         mkdir .kube
   //         ls
@@ -110,7 +115,7 @@ stages {
   //         cat values.yml
   //         sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
   //         helm upgrade --install app fastapi --values=values.yml --namespace prod
-  //         '''
+  //         """
   //       }
   //     }
   //   }
