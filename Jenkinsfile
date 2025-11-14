@@ -1,7 +1,7 @@
 pipeline {
 environment {
   DOCKER_ID = "kasyc"
-  DOCKER_IMAGE = "datascientestapi"
+  DOCKER_IMAGE = "jenkins-devops-exam"
   DOCKER_TAG = "v.${BUILD_ID}.0"
 }
 agent any
@@ -9,9 +9,11 @@ stages {
   stage('Docker Build') {
     steps {
       script {
-      sh '''
+      sh """
       docker compose build
-      '''
+      docker image tag "${DOCKER_ID}/${DOCKER_IMAGE}:movie.latest" "${DOCKER_ID}/${DOCKER_IMAGE}:movie.${DOCKER_TAG}"
+      docker image tag "${DOCKER_ID}/${DOCKER_IMAGE}:cast.latest" "${DOCKER_ID}/${DOCKER_IMAGE}:cast.${DOCKER_TAG}"
+      """
       }
     }
   }
