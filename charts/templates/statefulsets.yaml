@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: movie-db
+spec:
+  selector:
+    matchLabels:
+      app: movie-db
+  serviceName: movie-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: movie-db
+    spec:
+      containers:
+        - name: movie-db
+          image: postgres:12.1-alpine
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: movie-db-adminpass
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: movie-db-env
+          volumeMounts:
+            - name: movie-data
+              mountPath: /var/lib/postgresql/data/
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+              name: postgres
+      volumes:
+        - name: movie-data
+          persistentVolumeClaim:
+            claimName: movie-pvc
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cast-db
+spec:
+  selector:
+    matchLabels:
+      app: cast-db
+  serviceName: cast-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cast-db
+    spec:
+      containers:
+        - name: cast-db
+          image: postgres:12.1-alpine
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cast-db-adminpass
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: cast-db-env
+          volumeMounts:
+            - name: cast-data
+              mountPath: /var/lib/postgresql/data/
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+              name: postgres
+      volumes:
+        - name: cast-data
+          persistentVolumeClaim:
+            claimName: cast-pvc
