@@ -9,32 +9,32 @@ stages {
   stage('Docker Build') {
     steps {
       script {
-      sh """
+      sh '''
       docker compose build
       docker image tag "${DOCKER_ID}/${DOCKER_IMAGE}:movie.latest" "${DOCKER_ID}/${DOCKER_IMAGE}:movie.${DOCKER_TAG}"
       docker image tag "${DOCKER_ID}/${DOCKER_IMAGE}:cast.latest" "${DOCKER_ID}/${DOCKER_IMAGE}:cast.${DOCKER_TAG}"
-      """
+      '''
       }
     }
   }
   stage('Docker Run') {
     steps {
       script {
-      sh """
+      sh '''
       docker compose down
       docker compose up --no-build -d
       sleep 10
-      """
+      '''
       }
     }
   }
   stage('Test Acceptance') {
     steps {
       script {
-      sh """
+      sh '''
       curl localhost:8080/api/v1/movies/docs
       curl localhost:8080/api/v1/casts/docs
-      """
+      '''
       }
     }
   }
@@ -45,7 +45,7 @@ stages {
     }
     steps {
       script {
-        sh """
+        sh '''
         docker login -u "$DOCKER_ID" -p "$DOCKER_PASS"
         # Push tagged images
         docker push "${DOCKER_ID}/${DOCKER_IMAGE}:movie.${DOCKER_TAG}"
@@ -53,7 +53,7 @@ stages {
         # Move latest tags
         docker push "${DOCKER_ID}/${DOCKER_IMAGE}:movie.latest"
         docker push "${DOCKER_ID}/${DOCKER_IMAGE}:cast.latest"
-        """
+        '''
       }
     }
   }
@@ -63,7 +63,7 @@ stages {
   //   }
   //   steps {
   //     script {
-  //     sh """
+  //     sh '''
   //     rm -Rf .kube
   //     mkdir .kube
   //     ls
@@ -72,7 +72,7 @@ stages {
   //     cat values.yml
   //     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
   //     helm upgrade --install app fastapi --values=values.yml --namespace dev
-  //     """
+  //     '''
   //     }
   //   }
   // }
@@ -82,7 +82,7 @@ stages {
   //   }
   //   steps {
   //     script {
-  //     sh """
+  //     sh '''
   //     rm -Rf .kube
   //     mkdir .kube
   //     ls
@@ -91,7 +91,7 @@ stages {
   //     cat values.yml
   //     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
   //     helm upgrade --install app fastapi --values=values.yml --namespace staging
-  //     """
+  //     '''
   //     }
   //   }
   // }
@@ -106,7 +106,7 @@ stages {
   //         input message: 'Do you want to deploy in production ?', ok: 'Yes'
   //       }
   //       script {
-  //         sh """
+  //         sh '''
   //         rm -Rf .kube
   //         mkdir .kube
   //         ls
@@ -115,7 +115,7 @@ stages {
   //         cat values.yml
   //         sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
   //         helm upgrade --install app fastapi --values=values.yml --namespace prod
-  //         """
+  //         '''
   //       }
   //     }
   //   }
